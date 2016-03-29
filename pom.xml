@@ -8,7 +8,7 @@
 	<groupId>com.atomicleopard.thundr</groupId>
 	<artifactId>thundr-contrib-freemarker</artifactId>
 	<packaging>jar</packaging>
-	<version>2.0.0-alpha-SNAPSHOT</version>
+	<version>2.0.0-alpha</version>
 
 	<properties>
 		<thundr.version>2.0.0</thundr.version>
@@ -74,4 +74,8 @@
 	</build>
 
 	<modelVersion>4.0.0</modelVersion>
+
+  <scm>
+    <tag>thundr-contrib-freemarker-2.0.0-alpha</tag>
+  </scm>
 </project>
