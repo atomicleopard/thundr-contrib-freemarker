@@ -27,8 +27,10 @@ You can return FreemarkerView from controller methods which will render the supp
     
     public FreemarkerView get(){
         Map<String, Object> model = new HashMap<String, Object>();
-        return new FreemarkerView("/WEB-INF/ftl/view.ftl", model);
+        return new FreemarkerView("/ftl/view.ftl", model);
     }
+    
+Views can be located as a classpath resource, or inside /WEB-INF/ in your war file.
     
 --------------    
 thundr-contrib-freemarker - Copyright (C) 2016 Atomic Leopard Pty Ltd    
