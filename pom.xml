@@ -8,13 +8,13 @@
 	<groupId>com.atomicleopard.thundr</groupId>
 	<artifactId>thundr-contrib-freemarker</artifactId>
 	<packaging>jar</packaging>
-	<version>2.0.0-alpha-SNAPSHOT</version>
+	<version>2.0.0-alpha</version>
 
 	<scm>
 		<connection>scm:git:https://github.com/atomicleopard/${artifactId}</connection>
 		<developerConnection>scm:git:https://github.com/atomicleopard/${artifactId}</developerConnection>
 		<url>https://github.com/atomicleopard/${artifactId}</url>
-		<tag>HEAD</tag>
+		<tag>thundr-contrib-freemarker-2.0.0-alpha</tag>
 	</scm>
 
 	<properties>
