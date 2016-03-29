@@ -1,0 +1,1 @@
+Template with ${global} and ${request} and ${local}
