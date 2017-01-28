@@ -24,18 +24,17 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.atomicleopard.expressive.Expressive;
-import com.threewks.thundr.http.Cookies;
+import com.threewks.thundr.http.Cookie;
+import com.threewks.thundr.http.Cookie.CookieBuilder;
 import com.threewks.thundr.http.StatusCode;
-import com.threewks.thundr.test.mock.servlet.MockHttpServletRequest;
-import com.threewks.thundr.test.mock.servlet.MockHttpServletResponse;
+import com.threewks.thundr.request.mock.MockRequest;
+import com.threewks.thundr.request.mock.MockResponse;
 import com.threewks.thundr.view.GlobalModel;
 import com.threewks.thundr.view.ViewResolutionException;
 
@@ -48,8 +47,8 @@ public class FreemarkerViewResolverTest {
 	private GlobalModel globalModel;
 	private FreemarkerViewResolver viewResolver;
 	private Configuration configuration;
-	private MockHttpServletRequest req = new MockHttpServletRequest();
-	private MockHttpServletResponse resp = new MockHttpServletResponse();
+	private MockRequest req = new MockRequest();
+	private MockResponse resp = new MockResponse();
 
 	@Before
 	public void before() {
@@ -64,7 +63,7 @@ public class FreemarkerViewResolverTest {
 		FreemarkerView view = new FreemarkerView("/test.ftl", model("message", "Test", "countries", list("australia", "brazil")));
 		viewResolver.resolve(req, resp, view);
 
-		String content = resp.content();
+		String content = resp.getBodyAsString();
 		// @formatter:off
 		String expected = 
 			"FreeMarker Template example: Test\n"+  
@@ -76,8 +75,8 @@ public class FreemarkerViewResolverTest {
 			"    2. brazil\n";
 		// @formatter:on
 		assertThat(content, is(expected));
-		assertThat(resp.status(), is(StatusCode.OK.getCode()));
-		assertThat(resp.getContentType(), is("text/html"));
+		assertThat(resp.getStatusCode(), is(StatusCode.OK));
+		assertThat(resp.getContentTypeString(), is("text/html"));
 	}
 
 	@Test
@@ -89,7 +88,7 @@ public class FreemarkerViewResolverTest {
 		FreemarkerView view = new FreemarkerView("/test2.ftl", model("animals", list(cat, dog, whiteRhino)));
 		viewResolver.resolve(req, resp, view);
 
-		String content = resp.content();
+		String content = resp.getBodyAsString();
 		// @formatter:off
 		String expected = 
 				"\t<div>\n"+
@@ -103,8 +102,8 @@ public class FreemarkerViewResolverTest {
 				"\t</div>\n";  
 		// @formatter:on
 		assertThat(content, is(expected));
-		assertThat(resp.status(), is(StatusCode.OK.getCode()));
-		assertThat(resp.getContentType(), is("text/html"));
+		assertThat(resp.getStatusCode(), is(StatusCode.OK));
+		assertThat(resp.getContentTypeString(), is("text/html"));
 	}
 
 	@Test
@@ -116,7 +115,7 @@ public class FreemarkerViewResolverTest {
 		FreemarkerView view = new FreemarkerView("/test3.ftl", model("animals", list(cat, dog, whiteRhino)));
 		viewResolver.resolve(req, resp, view);
 
-		String content = resp.content();
+		String content = resp.getBodyAsString();
 		// @formatter:off
 		String expected = 
 				"\t<div class=\"protected-N\">\n"+
@@ -130,8 +129,8 @@ public class FreemarkerViewResolverTest {
 				"\t</div>\n";  
 		// @formatter:on
 		assertThat(content, is(expected));
-		assertThat(resp.status(), is(StatusCode.OK.getCode()));
-		assertThat(resp.getContentType(), is("text/html"));
+		assertThat(resp.getStatusCode(), is(StatusCode.OK));
+		assertThat(resp.getContentTypeString(), is("text/html"));
 	}
 
 	@Test
@@ -148,9 +147,9 @@ public class FreemarkerViewResolverTest {
 		FreemarkerView view = new FreemarkerView("basic-relative.ftl", localModel);
 		viewResolver.resolve(req, resp, view);
 
-		assertThat(resp.content(), is("Message"));
-		assertThat(resp.status(), is(StatusCode.OK.getCode()));
-		assertThat(resp.getContentType(), is("text/html"));
+		assertThat(resp.getBodyAsString(), is("Message"));
+		assertThat(resp.getStatusCode(), is(StatusCode.OK));
+		assertThat(resp.getContentTypeString(), is("text/html"));
 	}
 
 	@Test
@@ -164,9 +163,9 @@ public class FreemarkerViewResolverTest {
 		FreemarkerView view = new FreemarkerView("/variable.ftl", localModel);
 		viewResolver.resolve(req, resp, view);
 
-		assertThat(resp.content(), is("Template with global and still-global and local"));
-		assertThat(resp.status(), is(StatusCode.OK.getCode()));
-		assertThat(resp.getContentType(), is("text/html"));
+		assertThat(resp.getBodyAsString(), is("Template with global and still-global and local"));
+		assertThat(resp.getStatusCode(), is(StatusCode.OK));
+		assertThat(resp.getContentTypeString(), is("text/html"));
 	}
 
 	@Test
@@ -176,16 +175,16 @@ public class FreemarkerViewResolverTest {
 		globalModel.put("global", "global");
 		globalModel.put("request", "global");
 		globalModel.put("local", "global");
-		req.attribute("request", "request");
-		req.attribute("local", "request");
+		req.putData("request", "request");
+		req.putData("local", "request");
 		Map<String, Object> localModel = Expressive.map("local", "local");
 
 		FreemarkerView view = new FreemarkerView("/variable.ftl", localModel);
 		viewResolver.resolve(req, resp, view);
 
-		assertThat(resp.content(), is("Template with global and request and local"));
-		assertThat(resp.status(), is(StatusCode.OK.getCode()));
-		assertThat(resp.getContentType(), is("text/html"));
+		assertThat(resp.getBodyAsString(), is("Template with global and request and local"));
+		assertThat(resp.getStatusCode(), is(StatusCode.OK));
+		assertThat(resp.getContentTypeString(), is("text/html"));
 	}
 
 	@Test
@@ -223,13 +222,13 @@ public class FreemarkerViewResolverTest {
 	@Test
 	public void shouldRespectExtendedViewValues() {
 		FreemarkerView view = new FreemarkerView("/basic.ftl", model("message", "Message"));
-		Cookie cookie = Cookies.build("cookie").withValue("value2").build();
+		Cookie cookie = CookieBuilder.build("cookie").withValue("value2").build();
 		view.withContentType("content/type").withCharacterEncoding("UTF-16").withHeader("header", "value1").withCookie(cookie);
 
 		viewResolver.resolve(req, resp, view);
-		assertThat(resp.getContentType(), is("content/type"));
+		assertThat(resp.getContentTypeString(), is("content/type"));
 		assertThat(resp.getCharacterEncoding(), is("UTF-16"));
-		assertThat(resp.header("header"), is((Object) "value1"));
+		assertThat(resp.getHeader("header"), is((Object) "value1"));
 		assertThat(resp.getCookies(), hasItem(cookie));
 	}
 

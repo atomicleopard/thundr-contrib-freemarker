@@ -18,16 +18,13 @@
 package com.atomicleopard.thundr.freemarker;
 
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.OutputStreamWriter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.atomicleopard.expressive.Expressive;
+import com.threewks.thundr.request.Request;
+import com.threewks.thundr.request.Response;
 import com.threewks.thundr.view.BaseView;
 import com.threewks.thundr.view.GlobalModel;
+import com.threewks.thundr.view.Model;
 import com.threewks.thundr.view.ViewResolutionException;
 import com.threewks.thundr.view.ViewResolver;
 
@@ -52,22 +49,14 @@ public class FreemarkerViewResolver implements ViewResolver<FreemarkerView> {
 		return configuration;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void resolve(HttpServletRequest req, HttpServletResponse resp, FreemarkerView viewResult) {
+	public void resolve(Request req, Response resp, FreemarkerView viewResult) {
 		String view = viewResult.getView();
 		try {
-			Map<String, Object> model = new HashMap<String, Object>();
-			model.putAll(globalModel);
-			Enumeration<String> names = req.getAttributeNames();
-			for (String name : Expressive.iterable(names)) {
-				model.put(name, req.getAttribute(name));
-			}
-			model.putAll(viewResult.getModel());
-
+			Model model = Model.combine(globalModel, req.getAllData(), viewResult.getModel());
 			Template template = configuration.getTemplate(view);
 			BaseView.applyToResponse(viewResult, resp);
-			template.process(model, resp.getWriter());
+			template.process(model, new OutputStreamWriter(resp.getOutputStream()));
 		} catch (IOException | TemplateException e) {
 			throw new ViewResolutionException(e, "Failed to render Freemarker template '%s': %s", view, e.getMessage());
 		}
@@ -77,4 +66,5 @@ public class FreemarkerViewResolver implements ViewResolver<FreemarkerView> {
 	public String toString() {
 		return this.getClass().getSimpleName();
 	}
+
 }
